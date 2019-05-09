@@ -26,8 +26,8 @@ trait RootQueryTypeResolver {
         $ctx->load->model ('catalog/product');
         $args['sort'] = in_array($key_mapper[$args['sort']], array_keys($key_mapper)) ? $key_mapper[$args['sort']] : '';
         $products = $ctx->model_catalog_product->getProducts ($args);
-        for($i=0 ; $i < count($products); $i++ ){
-            $products[$i]['description'] = strip_tags(html_entity_decode($product['description']));
+        foreach($products as &$product){
+            $product['description'] = strip_tags(html_entity_decode($product['description']));
         }
         return $products;
     }
