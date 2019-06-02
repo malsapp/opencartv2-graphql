@@ -4073,6 +4073,15 @@ class Types {
                     'resolve' => function ($root, $args, $ctx) {
                         return self::$resolvers->MutationType_verifyMobileCode ($root, $args, $ctx);
                     }
+                ],
+                'setDeliveryDateTime' => [
+                    'type' => Type::boolean (),
+                    'args' => [
+                        'delivery_date' => Type::nonNull (Type::string ())
+                    ],
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->MutationType_setOrderDeliveryDateTime ($root, $args, $ctx);
+                    }
                 ]
             ]; }
         ]);
