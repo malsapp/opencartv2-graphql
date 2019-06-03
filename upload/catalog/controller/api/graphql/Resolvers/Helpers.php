@@ -749,9 +749,7 @@ if (!function_exists ('variationData')) {
     }
 }
 
-function getFormattedDate($ctx, $args){
-    $dateFormat = $ctx->config->get('deliverydatetime_dateformat');
-    $date=(string)$args['date'];
+function getFormattedDate($dateFormat, $date){
     $date = str_replace('/', '-',$date);
     if($dateFormat=="MM-DD-YYYY")
     {
