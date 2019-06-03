@@ -6,7 +6,7 @@ require_once __DIR__.'/Resolvers/Helpers.php';
 require_once __DIR__.'/Types.php';
 
 define ('GQ_INTERNAL_KEY', '__GQ_INTERNAL_KEY__');
-define ('GQ_PLUGIN_VERSION', '1.0');
+define ('GQ_PLUGIN_VERSION', '1.129');
 
 class ControllerApiGraphqlUsage extends Controller {
 	public $sess = "";
