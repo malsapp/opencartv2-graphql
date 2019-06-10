@@ -633,7 +633,8 @@ trait RootQueryTypeResolver {
         while($fromDayNum <= $toDayNum){
             $day=[
                 'date' => jdtogregorian($fromDayNum),
-                'is_available' => true
+                'is_available' => true,
+                'dayName'=> jddayofweek($fromDayNum,2)
             ];
             $dayText=jddayofweek($fromDayNum,1);
             if (in_array($dayText, $configured_weekHolidaysText)) {

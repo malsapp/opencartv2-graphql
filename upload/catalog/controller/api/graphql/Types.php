@@ -2628,6 +2628,9 @@ class Types {
                 'date' => [
                     'type' => Type::string ()
                 ],
+                'dayName' => [
+                    'type' => Type::string ()
+                ],
                 'is_available' => [
                     'type' => Type::boolean ()
                 ],
