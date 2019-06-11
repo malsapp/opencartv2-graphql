@@ -440,6 +440,7 @@ trait MutationTypeResolver {
 
     public function MutationType_setOrderDeliveryDateTime ($root, $args, &$ctx) {
         $ctx->session->data['delivery_date'] = $args['delivery_date'];
+        $ctx->session->data['delivery_time'] = $args['delivery_time'];
     }
 }
 ?>

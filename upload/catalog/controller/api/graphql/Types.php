@@ -4080,7 +4080,8 @@ class Types {
                 'setDeliveryDateTime' => [
                     'type' => Type::boolean (),
                     'args' => [
-                        'delivery_date' => Type::nonNull (Type::string ())
+                        'delivery_date' => Type::nonNull (Type::string ()),
+                        'delivery_time' => Type::nonNull (Type::string ())
                     ],
                     'resolve' => function ($root, $args, $ctx) {
                         return self::$resolvers->MutationType_setOrderDeliveryDateTime ($root, $args, $ctx);
