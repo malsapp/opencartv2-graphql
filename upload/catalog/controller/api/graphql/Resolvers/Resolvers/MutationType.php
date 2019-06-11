@@ -113,6 +113,8 @@ trait MutationTypeResolver {
             error_log ("[Option]:\n" . print_r ($option_data, true));
         }
 
+        $data['delivery_date'] = isset($ctx->session->data['delivery_date'])?$ctx->session->data['delivery_date']:'';
+        $data['delivery_time'] = isset($ctx->session->data['delivery_time'])?$ctx->session->data['delivery_time']:'';
 
         // place order.
         $id = $ctx->model_checkout_order->addOrder ($data);
@@ -441,6 +443,7 @@ trait MutationTypeResolver {
     public function MutationType_setOrderDeliveryDateTime ($root, $args, &$ctx) {
         $ctx->session->data['delivery_date'] = $args['delivery_date'];
         $ctx->session->data['delivery_time'] = $args['delivery_time'];
+        return true;
     }
 }
 ?>
