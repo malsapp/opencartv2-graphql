@@ -459,7 +459,7 @@ trait RootQueryTypeResolver {
     public function RootQueryType_paymentMethods ($root, $args, &$ctx) {
         $res = getPaymentMethods ($ctx);
         foreach ($res as &$item) {
-            $item['quote'] = reset($item['quote']);
+            $item['quote'] = $item['quote'];
         }
         return $res;
     }

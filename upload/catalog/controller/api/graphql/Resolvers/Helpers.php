@@ -570,9 +570,9 @@ function getMethods(&$ctx, $methodType)
 					if ($quote) {
 							$method_data[$result['code']] = array(
 									'title'      => $quote['title'],
-									'quote'      => $quote['quote'],
+									'quote'      => [ 'code' => $quote['code']],
 									'sort_order' => $quote['sort_order'],
-									'error'      => $quote['error']
+									'error'      => isset($quote['error'])?$quote['error']:''
 							);
 					}
 			}
