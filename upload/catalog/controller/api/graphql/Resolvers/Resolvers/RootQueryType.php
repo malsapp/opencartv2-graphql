@@ -457,7 +457,11 @@ trait RootQueryTypeResolver {
     }
 
     public function RootQueryType_paymentMethods ($root, $args, &$ctx) {
-        return null;
+        $res = getPaymentMethods ($ctx);
+        foreach ($res as &$item) {
+            $item['quote'] = reset($item['quote']);
+        }
+        return $res;
     }
 
     public function RootQueryType_shippingMethods ($root, $args, &$ctx) {

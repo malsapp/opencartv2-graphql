@@ -498,46 +498,92 @@ function getTotals (&$ctx) {
     return $total_data;
 }
 
-function getShippingMethods (&$ctx) {
+function getShippingMethods (&$ctx, $type=0) {
     $ctx->load->language('checkout/checkout');
 
     if (isset($ctx->session->data['shipping_address'])) {
-        // Shipping Methods
-        $method_data = array();
-
-        $ctx->load->model('extension/extension');
-
-        $results = $ctx->model_extension_extension->getExtensions('shipping');
-
-        foreach ($results as $result) {
-            if ($ctx->config->get($result['code'] . '_status')) {
-                $ctx->load->model('extension/shipping/' . $result['code']);
-
-                $quote = $ctx->{'model_extension_shipping_' . $result['code']}->getQuote($ctx->session->data['shipping_address']);
-
-                if ($quote) {
-                    $method_data[$result['code']] = array(
-                        'title'      => $quote['title'],
-                        'quote'      => $quote['quote'],
-                        'sort_order' => $quote['sort_order'],
-                        'error'      => $quote['error']
-                    );
-                }
-            }
-        }
-
-        $sort_order = array();
-
-        foreach ($method_data as $key => $value) {
-            $sort_order[$key] = $value['sort_order'];
-        }
-
-        array_multisort($sort_order, SORT_ASC, $method_data);
-
-        $ctx->session->data['shipping_methods'] = $method_data;
+        $ctx->session->data['shipping_methods'] = getMethods($ctx, 'shipping');
     }
 
     return $ctx->session->data['shipping_methods'];
+}
+
+function getPaymentMethods (&$ctx) {
+    $ctx->load->language('checkout/checkout');
+
+    if (isset($ctx->session->data['shipping_address'])) {
+        $ctx->session->data['shipping_methods'] = getMethods($ctx, 'payment');
+    }
+
+    return $ctx->session->data['shipping_methods'];
+}
+
+function getMethods(&$ctx, $methodType)
+{
+    // Totals
+    $totals = array();
+    $taxes = $ctx->cart->getTaxes();
+    $total = 0;
+
+    // Because __call can not keep var references so we put them into an array.
+    $total_data = array(
+        'totals' => &$totals,
+        'taxes'  => &$taxes,
+        'total'  => &$total
+    );
+    
+    $ctx->load->model('extension/extension');
+
+    $sort_order = array();
+
+    $results = $ctx->model_extension_extension->getExtensions('total');
+
+    foreach ($results as $key => $value) {
+        $sort_order[$key] = $ctx->config->get($value['code'] . '_sort_order');
+    }
+
+    array_multisort($sort_order, SORT_ASC, $results);
+
+    foreach ($results as $result) {
+        if ($ctx->config->get($result['code'] . '_status')) {
+            $ctx->load->model('extension/total/' . $result['code']);
+            
+            // We have to put the totals in an array so that they pass by reference.
+            $ctx->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+        }
+    }
+
+	// Methods
+	$method_data = array();
+	$ctx->load->model('extension/extension');
+	$results = $ctx->model_extension_extension->getExtensions($methodType);
+	foreach ($results as $result) {
+			if ($ctx->config->get($result['code'] . '_status')) {
+					$ctx->load->model("extension/$methodType/" . $result['code']);
+
+					if($methodType == 'shipping'){
+						$quote = $ctx->{"model_extension_{$methodType}_" . $result['code']}->getQuote($ctx->session->data['shipping_address']);
+					}elseif($methodType == 'payment'){
+						$quote = $ctx->{"model_extension_{$methodType}_" . $result['code']}->getMethod($ctx->session->data['shipping_address'],$total);						
+					}
+
+					if ($quote) {
+							$method_data[$result['code']] = array(
+									'title'      => $quote['title'],
+									'quote'      => $quote['quote'],
+									'sort_order' => $quote['sort_order'],
+									'error'      => $quote['error']
+							);
+					}
+			}
+	}
+
+	$sort_order = array();
+	foreach ($method_data as $key => $value) {
+			$sort_order[$key] = $value['sort_order'];
+	}
+	array_multisort($sort_order, SORT_ASC, $method_data);
+	return $method_data;
 }
 
 function forgottenMail (&$ctx, $args) {
