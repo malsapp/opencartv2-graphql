@@ -103,9 +103,8 @@ class Types {
     public static $MenuItemType;
     public static $schema;
     public static $BankTransferConfirmationType;
-    public static $DeliveryDateTimeType;
+    public static $DeliveryDateType;
     public static $TimeSlotType;
-    public static $HolidayDayType;
 
     private function __clone () {}
     private function __construct () {
@@ -2623,32 +2622,20 @@ class Types {
             ]; }
         ]);
 
-        static::$DeliveryDateTimeType = new ObjectType ([
-            'name' => 'DeliveryDateTimeType',
+        static::$DeliveryDateType = new ObjectType ([
+            'name' => 'DeliveryDateType',
             'fields'  => function () { return [
-                'dateFormat' => [
+                'date' => [
                     'type' => Type::string ()
                 ],
-                'max_day' => [
+                'dayName' => [
                     'type' => Type::string ()
                 ],
-                'min_day' => [
-                    'type' => Type::string ()
-                ],
-                'date_separator' => [
-                    'type' => Type::string ()
-                ],
-                'time_interval' => [
-                    'type' => Type::string ()
-                ],
-                'weekHolidayDays' => [
-                    'type' => Type::string ()
+                'is_available' => [
+                    'type' => Type::boolean ()
                 ],
                 'timeSlots' => [
                     'type' => Type::listOf (self::$TimeSlotType)
-                ],
-                'holidayDays' => [
-                    'type' => Type::listOf (self::$HolidayDayType)
                 ]
             ]; }
         ]);
@@ -2656,50 +2643,14 @@ class Types {
         static::$TimeSlotType = new ObjectType ([
             'name' => 'TimeSlotType',
             'fields'  => function () { return [
-                'deliverytime_id' => [
-                    'type' => Type::id ()
-                ],
-                'title' => [
-                    'type' => Type::string ()
-                ],
                 'from_time' => [
                     'type' => Type::string ()
                 ],
                 'to_time' => [
                     'type' => Type::string ()
                 ],
-                'max_order' => [
-                    'type' => Type::string ()
-                ],
-                'orders_count' => [
-                    'type' => Type::int ()
-                ],
-                'status' => [
-                    'type' => Type::string ()
-                ]
-            ]; }
-        ]);
-
-        static::$HolidayDayType = new ObjectType ([
-            'name' => 'HolidayDayType',
-            'fields'  => function () { return [
-                'holiday_id' => [
-                    'type' => Type::id ()
-                ],
-                'holiday_name' => [
-                    'type' => Type::string ()
-                ],
-                'holiday_date' => [
-                    'type' => Type::string ()
-                ],
-                'is_recursive' => [
-                    'type' => Type::string ()
-                ],
-                'created_on' => [
-                    'type' => Type::string ()
-                ],
-                'last_edited_on' => [
-                    'type' => Type::string ()
+                'is_available' => [
+                    'type' => Type::boolean ()
                 ]
             ]; }
         ]);
@@ -3721,10 +3672,11 @@ class Types {
                         return self::$resolvers->RootQueryType_siteInfo ($root, $args, $ctx);
                     }
                 ],
-                'deliveryInfo' => [
-                    'type' => self::$DeliveryDateTimeType,
+                'deliverySlots' => [
+                    'type' => Type::listOf (self::$DeliveryDateType),
                     'args' => [
-                        'date' => Type::nonNull (Type::string ())
+                        'from' => Type::nonNull (Type::string ()),
+                        'to' => Type::nonNull (Type::string ())
                     ],
                     'resolve' => function ($root, $args, $ctx) {
                         return self::$resolvers->RootQueryType_deliveryDateTime ($root, $args, $ctx);
@@ -4123,6 +4075,16 @@ class Types {
                     ],
                     'resolve' => function ($root, $args, $ctx) {
                         return self::$resolvers->MutationType_verifyMobileCode ($root, $args, $ctx);
+                    }
+                ],
+                'setDeliveryDateTime' => [
+                    'type' => Type::boolean (),
+                    'args' => [
+                        'delivery_date' => Type::nonNull (Type::string ()),
+                        'delivery_time' => Type::nonNull (Type::string ())
+                    ],
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->MutationType_setOrderDeliveryDateTime ($root, $args, $ctx);
                     }
                 ]
             ]; }
