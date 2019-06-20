@@ -504,7 +504,7 @@ function getShippingMethods (&$ctx, $type=0) {
     if (isset($ctx->session->data['shipping_address'])) {
         $ctx->session->data['shipping_methods'] = getMethods($ctx, 'shipping');
     }
-
+    
     return $ctx->session->data['shipping_methods'];
 }
 
@@ -568,12 +568,26 @@ function getMethods(&$ctx, $methodType)
 					}
 
 					if ($quote) {
+                        if( $methodType == 'shipping' ){
+							$method_data[$result['code']] = array(
+                                'title'      => $quote['title'],
+                                'quote'      => $quote['quote'],
+                                'sort_order' => $quote['sort_order'],
+                                'error'      => isset($quote['error'])?$quote['error']:''
+                            );
+                        } elseif( $methodType == 'payment' ){
+                            // $ctx->load->model('setting/setting');
+                            // $settings = $ctx->model_setting_setting->getSetting($quote['code']);
 							$method_data[$result['code']] = array(
 									'title'      => $quote['title'],
-									'quote'      => [ 'code' => $quote['code']],
+									'quote'      => [ 
+                                        'code' => $quote['code'],
+                                        // 'details' => json_encode($settings)
+                                    ],
 									'sort_order' => $quote['sort_order'],
 									'error'      => isset($quote['error'])?$quote['error']:''
-							);
+                            );
+                        }
 					}
 			}
 	}
