@@ -359,6 +359,9 @@ class Types {
                 ],
                 'required' => [
                     'type' => Type::int ()
+                ],
+                'in_stock' => [
+                    'type' => Type::boolean ()
                 ]
             ]; }
         ]);
@@ -395,6 +398,9 @@ class Types {
                 ],
                 'weight_prefix' => [
                     'type' => Type::string ()
+                ],
+                'in_stock' => [
+                    'type' => Type::boolean ()
                 ]
             ]; }
         ]);
@@ -3728,6 +3734,16 @@ class Types {
                     ],
                     'resolve' => function ($root, $args, $ctx) {
                         return self::$resolvers->RootQueryType_deliveryDateTime ($root, $args, $ctx);
+                    }
+                ],
+                'availableOptions' => [
+                    'type' => Type::listOf( self::$ProductOptionType ),
+                    'args' => [
+                        'product_id' => Type::nonNull (Type::id ()),
+                        'options' => Type::nonNull (Type::listOf (self::$OrderProductOptionInput))
+                    ],
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->RootQueryType_availableOptions ($root, $args, $ctx);
                     }
                 ]
             ]; }
