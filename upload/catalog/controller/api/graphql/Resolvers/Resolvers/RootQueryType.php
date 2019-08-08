@@ -7,7 +7,9 @@ trait RootQueryTypeResolver {
 
     public function RootQueryType_product ($root, $args, &$ctx) {
         $ctx->load->model ('catalog/product');
-        return $ctx->model_catalog_product->getProduct ($args['id']);
+        $product = $ctx->model_catalog_product->getProduct ($args['id']);
+        $product['description'] = strip_tags(html_entity_decode($product['description']));
+        return $product;
     }
 
     public function RootQueryType_products ($root, $args, &$ctx) {
@@ -23,7 +25,11 @@ trait RootQueryTypeResolver {
 
         $ctx->load->model ('catalog/product');
         $args['sort'] = in_array($key_mapper[$args['sort']], array_keys($key_mapper)) ? $key_mapper[$args['sort']] : '';
-        return $ctx->model_catalog_product->getProducts ($args);
+        $products = $ctx->model_catalog_product->getProducts ($args);
+        foreach($products as &$product){
+            $product['description'] = strip_tags(html_entity_decode($product['description']));
+        }
+        return $products;
     }
 
     public function RootQueryType_compareProducts ($root, $args, &$ctx) {
@@ -120,7 +126,7 @@ trait RootQueryTypeResolver {
                 return array(
                     'id' => $faq['faq_id'] . ':' . -1,
                     'title' => $faq['title'],
-                    'content' => $faq['description'],
+                    'content' => strip_tags(html_entity_decode($faq['description'])),
                     'date' => $faq['date_added']
                 );
             }
@@ -134,8 +140,8 @@ trait RootQueryTypeResolver {
                 return array(
                     'id' => $news['news_id'] . ':' . -2,
                     'title' => $news['title'],
-                    'content' => $news['description'],
-                    'excerpt' => $news['short_description'],
+                    'content' => strip_tags(html_entity_decode($news['description'])),
+                    'excerpt' => strip_tags(html_entity_decode($news['short_description'])),
                     'date' => $news['date_added']
                 );
             }
@@ -149,7 +155,7 @@ trait RootQueryTypeResolver {
                 return array(
                     'id' => $information['information_id'] . ':' . -3,
                     'title' => $information['title'],
-                    'content' => $information['description']
+                    'content' => strip_tags(html_entity_decode($information['description']))
                 );
             }
         }
@@ -172,7 +178,7 @@ trait RootQueryTypeResolver {
                     return array(
                         'id' => $faq['faq_id'] . ':' . -1,
                         'title' => $faq['title'],
-                        'content' => $faq['description'],
+                        'content' => strip_tags(html_entity_decode($faq['description'])),
                         'date' => $faq['date_added']
                     );
                 }, $faqs)
@@ -191,8 +197,8 @@ trait RootQueryTypeResolver {
                     return array(
                         'id' => $news_item['news_id'] . ':' . -2,
                         'title' => $news_item['title'],
-                        'content' => $news_item['description'],
-                        'excerpt' => $news_item['short_description'],
+                        'content' => strip_tags(html_entity_decode($news_item['description'])),
+                        'excerpt' => strip_tags(html_entity_decode($news_item['short_description'])),
                         'date' => $news_item['date_added']
                     );
                 }, $news)
@@ -210,7 +216,7 @@ trait RootQueryTypeResolver {
                     return array(
                         'id' => $information['information_id'] . ':' . -3,
                         'title' => $information['title'],
-                        'content' => $information['description']
+                        'content' => strip_tags(html_entity_decode($information['description']))
                     );
                 }, $informations)
             );
@@ -451,7 +457,11 @@ trait RootQueryTypeResolver {
     }
 
     public function RootQueryType_paymentMethods ($root, $args, &$ctx) {
-        return null;
+        $res = getPaymentMethods ($ctx);
+        foreach ($res as &$item) {
+            $item['quote'] = $item['quote'];
+        }
+        return $res;
     }
 
     public function RootQueryType_shippingMethods ($root, $args, &$ctx) {
@@ -592,52 +602,92 @@ trait RootQueryTypeResolver {
     }
     
     public function RootQueryType_deliveryDateTime ($root, $args, &$ctx) {
-        if($ctx->config->get('deliverydatetime_status')==1) {
-            $dateFormat = $ctx->config->get('deliverydatetime_dateformat');
-            $deliverydatetime_max_day = $ctx->config->get('deliverydatetime_max_day');
-            $deliverydatetime_min_day = $ctx->config->get('deliverydatetime_min_day');
-            $deliverydatetime_format = $ctx->config->get('deliverydatetime_format');
-            $deliverydatetime_timeinterval = $ctx->config->get('deliverydatetime_timeinterval');
-            $weekHolidayDays = $ctx->config->get('weekdays_weekdayslist');
+        $dateFormat = $ctx->config->get('deliverydatetime_dateformat');
+        
+        // instaniate validDays array
+        $deliveryDays=array();
 
-            $ctx->load->model ('localisation/shippingdate');
-            $timeslots=$ctx->model_localisation_shippingdate->getShippingdate();
-            for($i=0;$i<count($timeslots);$i++){
-                $timeslots[$i]['orders_count'] =0;
+        // get day-from
+        $dayFrom=explode('-',$args['from']);
+        $fromDayNum = gregoriantojd($dayFrom[1], $dayFrom[0], $dayFrom[2]);
+
+        // get day-to
+        $dayTo=explode('-',$args['to']);
+        $toDayNum = gregoriantojd($dayTo[1], $dayTo[0], $dayTo[2]);
+        
+        // calculate holiday days
+        $holidayNumToDayConvertion=[
+            0 => 'Sunday',
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday'
+        ];
+        
+        $configured_weekHolidaysNum = explode(',', $ctx->config->get('weekdays_weekdayslist'));
+        $configured_weekHolidaysText = array();
+        if(count($configured_weekHolidaysNum)>0){
+            foreach($configured_weekHolidaysNum as $holiday_Num){
+                $configured_weekHolidaysText[] = $holidayNumToDayConvertion[$holiday_Num];
             }
+        }
 
-            $datevaluechange=getFormattedDate($ctx, $args);
+        while($fromDayNum <= $toDayNum){
+            $day=[
+                'date' => jdtogregorian($fromDayNum),
+                'is_available' => true,
+                'dayName'=> jddayofweek($fromDayNum,2)
+            ];
+            $dayText=jddayofweek($fromDayNum,1);
+            if (in_array($dayText, $configured_weekHolidaysText)) {
+                $day['is_available']=false;
+            }
+            $deliveryDays[]=$day;
+            $fromDayNum++;
+        }
 
-            $ctx->load->model ('checkout/holidaydate');
-            $holidayDays=$ctx->model_checkout_holidaydate->getHolidaydate();
-            
-            $ctx->load->model ('checkout/maxorderslot');
-            $orderList=$ctx->model_checkout_maxorderslot->getorderslist($datevaluechange->format('Y-m-d'));
-
-            foreach($orderList as $order) {
+        // if day is valid check timeslots within it
+        foreach($deliveryDays as &$day){
+            if($day['is_available']==true){
+                // get max orders
+                $ctx->load->model ('localisation/shippingdate');
+                $timeslots=$ctx->model_localisation_shippingdate->getShippingdate();
                 for($i=0;$i<count($timeslots);$i++){
-                    $haystack=date("H:i", strtotime(substr($order['delivery_time'],0,8)));
-                    $needle=$timeslots[$i]['from_time'];
-                    if($haystack == $needle){
-                        $timeslots[$i]['orders_count'] +=1;
-                        break;
+                    $timeslots[$i]['orders_count'] =0;
+                    $timeslots[$i]['is_available'] =true;
+                }
+
+                // get current orders count
+                $datevaluechange=getFormattedDate($dateFormat, $day['date']);
+
+                // gets orders in a day
+                $ctx->load->model ('checkout/maxorderslot');
+                $orderList=$ctx->model_checkout_maxorderslot->getorderslist($datevaluechange->format('Y-m-d'));
+                foreach($orderList as $order) {
+                    for($i=0;$i<count($timeslots);$i++){
+                        $haystack=date("H:i", strtotime(substr($order['delivery_time'],0,8)));
+                        $needle=$timeslots[$i]['from_time'];
+                        if($haystack == $needle){
+                            $timeslots[$i]['orders_count'] +=1;
+                            break;
+                        }
                     }
                 }
+                
+                // now, check if it time slot is valid or not
+                for($i=0;$i<count($timeslots);$i++){
+                    if($timeslots[$i]['max_order'] <= $timeslots[$i]['orders_count']){
+                        $timeslots[$i]['is_available'] = false;
+                    }
+                }
+                
+                $day['timeSlots']=$timeslots;
             }
-
-            $data = [
-                'dateFormat' => $dateFormat,
-                'max_day' => $deliverydatetime_max_day,
-                'min_day' => $deliverydatetime_min_day,
-                'date_separator' => $deliverydatetime_format,
-                'time_interval' => $deliverydatetime_timeinterval,
-                'weekHolidayDays' => $weekHolidayDays,
-                'timeSlots' => $timeslots,
-                'holidayDays' => $holidayDays
-            ];
-            
-            return $data;
         }
+
+        return $deliveryDays;
     }
 
     public function RootQueryType_availableOptions ($root, $args, $ctx) {
