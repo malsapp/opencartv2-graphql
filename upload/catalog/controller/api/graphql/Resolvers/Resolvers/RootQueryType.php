@@ -691,7 +691,7 @@ trait RootQueryTypeResolver {
     }
 
     public function RootQueryType_availableOptions ($root, $args, $ctx) {
-        return [];
+        return null;
     }
 
     // public function RootQueryType_photo($root, $args, &$ctx){

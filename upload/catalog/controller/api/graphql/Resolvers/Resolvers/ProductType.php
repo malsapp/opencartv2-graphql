@@ -36,6 +36,7 @@ trait ProductTypeResolver {
     {
         $ctx->load->model('catalog/product');
         $options = $ctx->model_catalog_product->getProductOptions($root['product_id']);
+        if(count($options) == 0)return null;
         foreach ($options as &$option) {
             foreach ($option['product_option_value'] as &$value) {
                 $option['in_stock'] = $option['in_stock'] ? $option['in_stock'] : false;

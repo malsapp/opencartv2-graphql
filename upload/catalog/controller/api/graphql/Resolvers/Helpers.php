@@ -547,13 +547,14 @@ function getMethods(&$ctx, $methodType)
 					$ctx->load->model('setting/setting');
 					$settings = $ctx->model_setting_setting->getSetting($quote['code']);
                     $detailes=array();
-                    
+
 					if($quote['code']=='bank_transfer'){
-                        // $banks=array_filter(array_keys($settings), function($key){
-                        //     return strstr($key,'bank_transfer_bank');
-                        // });
-                        // foreach($banks as $bank){
-                            $bank_detailes = explode("\r\n",$settings['bank_transfer_bank1']);
+                        $keys = array_keys($settings);
+                        $pattern="bank_transfer_bank";
+                        $result = preg_grep("/{$pattern}/", $keys);
+
+                        foreach($result as $index => $associative){
+                            $bank_detailes = explode("\r\n", $settings[$associative]);
                             $_bank=[
                                 'bank_name' => $bank_detailes[0],
                                 'account_name' => $bank_detailes[1],
@@ -562,13 +563,13 @@ function getMethods(&$ctx, $methodType)
                                 'bic' => ''                      
                             ];
                             $detailes[]=$_bank;
-                        // }
+                        }
 					}
 					$method_data[$result['code']] = array(
 						'title'      => $quote['title'],
 						'quote'      => [ 
 							'code' => $quote['code'],
-							'details' => json_encode($detailes)
+							'details' => json_encode($detailes, JSON_UNESCAPED_UNICODE)
 						],
 						'sort_order' => $quote['sort_order'],
 						'error'      => isset($quote['error'])?$quote['error']:''
