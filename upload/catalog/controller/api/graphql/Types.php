@@ -1,8 +1,7 @@
 <?php
 namespace GQL;
 
-// require_once __DIR__.'/vendor/autoload.php';
-require_once __DIR__.'/Resolvers/Resolvers.php';
+require_once __DIR__.'/includes/Resolvers.php';
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\InputObjectType;
@@ -104,6 +103,8 @@ class Types {
     public static $schema;
     public static $BankTransferConfirmationType;
     public static $DeliveryDateType;
+    public static $ResponseType;
+    public static $ResponseObjectType;
     public static $TimeSlotType;
 
     private function __clone () {}
@@ -3038,6 +3039,33 @@ class Types {
             ]; }
         ]);
 
+        static::$ResponseObjectType = new ObjectType ([
+            'name' => 'ResponseObjectType',
+            'fields'  => function () { return [
+                'title' => [
+                    'type' => Type::string ()
+                ],
+                'code' => [
+                    'type' => Type::string ()
+                ],
+                'content' => [
+                    'type' => Type::string ()
+                ]
+            ]; }
+        ]);
+
+        static::$ResponseType = new ObjectType ([
+            'name' => 'ResponseType',
+            'fields'  => function () { return [
+                'data' => [
+                    'type' => Type::listOf(self::$ResponseObjectType)
+                ],
+                'errors' => [
+                    'type' => Type::listOf(self::$ResponseObjectType)
+                ]
+            ]; }
+        ]);
+
         static::$RootQueryType = new ObjectType ([
             'name' => 'RootQueryType',
             'fields'  => function () { return [
@@ -4101,6 +4129,50 @@ class Types {
                     ],
                     'resolve' => function ($root, $args, $ctx) {
                         return self::$resolvers->MutationType_setOrderDeliveryDateTime ($root, $args, $ctx);
+                    }
+                ],
+                'sendOTP' => [
+                    'type' => self::$ResponseType,
+                    'args' => [
+                        'country_code' => Type::nonNull (Type::string ()),
+                        'phone_number' => Type::nonNull (Type::string ()),
+                        'purpose' =>  Type::string (),
+                        'via' =>  Type::string ()
+                    ],
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->MutationType_sendOTP ($root, $args, $ctx);
+                    }
+                ],
+                'verifyOTP' => [
+                    'type' => Type::boolean (),
+                    'args' => [
+                        'country_code' => Type::nonNull (Type::string ()),
+                        'phone_number' => Type::nonNull (Type::string ()),
+                        'token' => Type::nonNull (Type::string ())
+                    ],
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->MutationType_verifyOTP ($root, $args, $ctx);
+                    }
+                ],
+                'sendForgetPasswordSMS' => [
+                    'type' => self::$ResponseType,
+                    'args' => [
+                        'country_code' => Type::nonNull (Type::string ()),
+                        'phone_number' => Type::nonNull (Type::string ()),
+                    ],
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->MutationType_sendForgetPassword ($root, $args, $ctx);
+                    }
+                ],
+                'loginByMobileNumberOTP' => [
+                    'type' => self::$ResponseType,
+                    'args' => [
+                        'country_code' => Type::nonNull (Type::string ()),
+                        'phone_number' => Type::nonNull (Type::string ()),
+                        'token' => Type::nonNull (Type::string ())
+                    ],
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->MutationType_loginByMobileNumberOTP ($root, $args, $ctx);
                     }
                 ]
             ]; }

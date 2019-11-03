@@ -2,7 +2,7 @@
 use GraphQL\GraphQL;
 
 require_once __DIR__.'/vendor/autoload.php';
-require_once __DIR__.'/Resolvers/Helpers.php';
+require_once __DIR__.'/includes/Helpers/Helpers.php';
 require_once __DIR__.'/Types.php';
 
 define ('GQ_INTERNAL_KEY', '__GQ_INTERNAL_KEY__');
@@ -43,7 +43,7 @@ class ControllerApiGraphqlUsage extends Controller {
 					}
 
 					if (!empty ($this->sess)){
-						$this->sess = \GQL\getSession ($this, $this->sess);
+						$this->sess = GQL\Helpers\getSession ($this, $this->sess);
 						header("x-session-id: {$this->sess}");
 					}
 

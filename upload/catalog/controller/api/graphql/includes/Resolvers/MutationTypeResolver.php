@@ -445,5 +445,79 @@ trait MutationTypeResolver {
         $ctx->session->data['delivery_time'] = $args['delivery_time'];
         return true;
     }
+
+
+    public function MutationType_sendOTP($root, $args, $ctx)
+    {
+        $via = $args['via'] ?? 'sms';
+        $purpose = $args['purpose'] ?? $args['purpose'];
+
+        $to = [
+            'country_code' => $args['country_code'],
+            'phone_number' => $args['phone_number'],
+        ];
+        $options = [
+            'purpose' => $purpose,
+            'via' => $via
+        ];
+        
+        return (new MobileManager())->sendOTP($to, $options);
+    }
+
+    public function MutationType_sendForgetPassword($root, $args, $ctx)
+    {
+        $via = $args['via'] ?? 'sms';
+        $to = [
+            'country_code' => $args['country_code'],
+            'phone_number' => $args['phone_number'],
+        ];
+        $options = [
+            'via'=>$via
+        ];
+        return (new MobileManager())->sendForgetPassword($to, $options);
+    }
+
+    public function MutationType_verifyOTP($root, $args, $ctx)
+    {
+        $to = [
+            'country_code' => $args['country_code'],
+            'phone_number' => $args['phone_number'],
+        ];
+        $token = $args['token'];
+        return (new MobileManager())->verifyOTP($to, $token);
+    }
+    
+    public function MutationType_loginByMobileNumberOTP ($root, $args, $ctx) {
+      $response = [
+        'data' => [],
+        'errors' => []
+      ];
+      $to = [
+          'country_code' => $args['country_code'],
+          'phone_number' => $args['phone_number'],
+      ];
+      $isValid = (new MobileManager())->verifyOTP($to,$args['token']);
+  
+      if($isValid){
+        // We need to handle if user number is invalid and has no associated User account
+        $loginToken = User::instance ()->loginByMobileNumberOTP ($args['country_code'].$args['phone_number']);
+        if($loginToken)
+        {
+          $response['data'][] = [
+            'code' => 'SUCCESS',
+            'title' => 'LOGINTOKEN',
+            'content' => $loginToken,
+        ];
+        }
+      }else{
+          $response['errors'][] = [
+            'code' => 'INVALIDTOKEN',
+            'title' => 'Invalid Token',
+            'content' => 'The token is invalid!',
+        ];
+      }
+    
+      return $response;
+    }
 }
 ?>
