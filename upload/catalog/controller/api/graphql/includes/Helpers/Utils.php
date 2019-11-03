@@ -1,5 +1,5 @@
 <?php
-namespace GQL;
+namespace GQL\Helpers;
 
 function validateLogin ($args, &$ctx) {
     $errors = array();

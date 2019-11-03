@@ -1,5 +1,5 @@
 <?php
-namespace GQL;
+namespace GQL\Resolvers;
 
 require_once realpath (__DIR__ . '/../Helpers.php');
 

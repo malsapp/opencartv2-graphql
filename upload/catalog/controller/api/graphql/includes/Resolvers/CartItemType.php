@@ -1,5 +1,5 @@
 <?php
-namespace GQL;
+namespace GQL\Resolvers;
 
 trait CartItemTypeResolver {
     
