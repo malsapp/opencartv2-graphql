@@ -1,7 +1,8 @@
 <?php
-namespace WCGQL\Mobile;
+namespace GQL\Mobile;
 
-use WCGQL\Mobile\Contracts\MobileDriverInterface;
+use GQL\Mobile\Contracts\MobileDriverInterface;
+use GQL\Helpers;
 
 class MobileManager
 {
@@ -39,10 +40,10 @@ class MobileManager
     public function setMobileProvider($mobileDriver = "")
     {
         $providerClassName = $mobileDriver;
-        if ($mobileDriver === "" || !class_exists('WCGQL\\Mobile\\Providers\\' . $providerClassName)) {
-            $providerClassName = get_option('mobile_provider');
+        if ($mobileDriver === "" || !class_exists('GQL\\Mobile\\Providers\\' . $providerClassName)) {
+            $providerClassName = Helpers\getSettingByKey($ctx, 'config_mobile', 'mobile_provider')['value'];
         }
-        $providerClass = 'WCGQL\\Mobile\\Providers\\' . $providerClassName;
+        $providerClass = 'GQL\\Mobile\\Providers\\' . $providerClassName;
         $provider  = new $providerClass;
         if(!($provider instanceof MobileDriverInterface)){
             throw new \Exception("Provider Not Valid");

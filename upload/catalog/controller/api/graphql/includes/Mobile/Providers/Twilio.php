@@ -1,9 +1,9 @@
 <?php
 
-namespace WCGQL\Mobile\Providers;
+namespace GQL\Mobile\Providers;
 
 use Twilio\Rest\Client;
-use WCGQL\Mobile\Contracts\MobileDriverInterface;
+use GQL\Mobile\Contracts\MobileDriverInterface;
 
 class Twilio extends MobileDriver implements MobileDriverInterface
 {
@@ -14,12 +14,12 @@ class Twilio extends MobileDriver implements MobileDriverInterface
     /**
      * Populate the credentials required to consume the api
      */
-    public function __construct()
+    public function __construct($data)
     {
-        $sid = get_option('twilio_sid');
-        $token = get_option('twilio_token');
-        $this->phoneNumber = get_option('twilio_phoneNumber');
-        $this->senderName = get_option('twilio_senderName');
+        $sid = $data['twilio_sid'];
+        $token = $data['twilio_token'];
+        $this->phoneNumber = $data['twilio_phoneNumber'];
+        $this->senderName = $data['twilio_senderName'];
         $this->twilio = new Client($sid, $token);
     }
 

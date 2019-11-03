@@ -1,8 +1,8 @@
 <?php
 
-namespace WCGQL\Mobile\Providers;
+namespace GQL\Mobile\Providers;
 
-use WCGQL\Mobile\Contracts\MobileDriverInterface;
+use GQL\Mobile\Contracts\MobileDriverInterface;
 
 class Mobily extends MobileDriver implements MobileDriverInterface
 {
@@ -12,10 +12,10 @@ class Mobily extends MobileDriver implements MobileDriverInterface
     /**
      * Populate the credentials required to consume the api
      */
-    public function __construct()
+    public function __construct($data)
     {
-        $this->APIKEY = get_option('mobily_apikey');
-        $this->senderName = get_option('mobily_senderName');
+        $this->APIKEY = $data['mobily_apikey'];
+        $this->senderName = $data['mobily_senderName'];
     }
 
     /**

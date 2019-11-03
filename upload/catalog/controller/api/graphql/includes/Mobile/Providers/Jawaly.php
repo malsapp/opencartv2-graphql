@@ -1,8 +1,8 @@
 <?php
 
-namespace WCGQL\Mobile\Providers;
+namespace GQL\Mobile\Providers;
 
-use WCGQL\Mobile\Contracts\MobileDriverInterface;
+use GQL\Mobile\Contracts\MobileDriverInterface;
 
 class Jawaly extends MobileDriver implements MobileDriverInterface
 {
@@ -13,11 +13,11 @@ class Jawaly extends MobileDriver implements MobileDriverInterface
     /**
      * Populate the credentials required to consume the api
      */
-    public function __construct()
+    public function __construct($data)
     {
-        $this->USER = get_option('jawaly_username');
-        $this->PASSWORD = get_option('jawaly_password');
-        $this->SENDERNAME = get_option('jawaly_sendername');
+        $this->USER = $data['jawaly_username'];
+        $this->PASSWORD = $data['jawaly_password'];
+        $this->SENDERNAME = $data['jawaly_sendername'];
     }
 
     /**

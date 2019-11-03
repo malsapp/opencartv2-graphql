@@ -1,5 +1,5 @@
 <?php
-namespace WCGQL\Mobile\Contracts;
+namespace GQL\Mobile\Contracts;
 
 interface MobileDriverInterface
 {

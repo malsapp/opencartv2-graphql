@@ -1,9 +1,9 @@
 <?php
 
-namespace WCGQL\Mobile\Providers;
+namespace GQL\Mobile\Providers;
 
-use WCGQL\Helpers\User;
-use WCGQL\Mobile\DBManager;
+use GQL\Helpers\User;
+use GQL\Mobile\DBManager;
 
 abstract class MobileDriver
 {

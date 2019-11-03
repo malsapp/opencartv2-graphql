@@ -1,16 +1,16 @@
 <?php
-namespace WCGQL\Mobile;
 
-use WCGQL\Helpers\Singleton;
-use WCGQL\Translators\TranslatorsFactory;
+namespace GQL\Mobile;
+use GQL\Helpers;
 
 class DBManager extends Singleton
 {
     private $table_name;
-    public function __construct()
+    private $ctx;
+    public function __construct(&$ctx)
     {
-        global $wpdb;
-        $this->table_name = $wpdb->prefix . 'otp_tokens';
+        $this->ctx = $ctx;
+        $this->table_name = DB_PREFIX . 'otp_tokens';
     }
 
     /**
@@ -37,14 +37,8 @@ class DBManager extends Singleton
      */
     private function insertCode($telephone, $code)
     {
-        global $wpdb;
-
-        $wpdb->query(
-            $wpdb->prepare(
-                "INSERT INTO $this->table_name (telephone, `code`, createdAt) values (%s, %s, NOW())",
-                $telephone,
-                $code
-            )
+        $this->ctx->db->query(
+            "INSERT INTO $this->table_name (telephone, `code`, createdAt) values ({$telephone}, {$code}, NOW())"
         );
 
         return $code;
@@ -57,16 +51,11 @@ class DBManager extends Singleton
      */
     private function searchCode($telephone)
     {
-        global $wpdb;
-
-        $code = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT `code` FROM $this->table_name WHERE telephone= %s AND is_valid = 1 AND UNIX_TIMESTAMP(createdAt)> ( UNIX_TIMESTAMP(NOW()) - 1000 ) LIMIT 1",
-                $telephone
-            )
+        $result = $this->ctx->db->query(
+            "SELECT `code` FROM $this->table_name WHERE telephone= {$telephone} AND is_valid = 1 AND UNIX_TIMESTAMP(createdAt)> ( UNIX_TIMESTAMP(NOW()) - 1000 ) LIMIT 1"
         );
 
-        return $code ? $code : false;
+        return $result ? $result['code'] : false;
     }
 
     /**
@@ -76,14 +65,8 @@ class DBManager extends Singleton
      */
     private function setNotValid($telephone, $token)
     {
-        global $wpdb;
-
-        $wpdb->query(
-            $wpdb->prepare(
-                "UPDATE $this->table_name SET is_valid = 0 WHERE telephone= %s AND `code` = %s",
-                $telephone,
-                $token
-            )
+        $this->ctx->db->query(
+            "UPDATE $this->table_name SET is_valid = 0 WHERE telephone= {$telephone} AND `code` = {$token}"
         );
     }
 
@@ -95,8 +78,8 @@ class DBManager extends Singleton
      */
     public function getMessageTemplate($message_topic)
     {
-        $currentLanguageCode = TranslatorsFactory::get_translator()->get_language()['code'];
-        return get_option("{$message_topic}-{$currentLanguageCode}") ?? get_option($message_topic);
+        $currentLanguageCode = $this->ctx->session->data['language'];
+        return Helpers\getSettingByKey($this->ctx,'config_mobile',"config_mobile_{$message_topic}-{$currentLanguageCode}");
     }
 
     /**
