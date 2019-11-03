@@ -1,7 +1,7 @@
 <?php
 namespace GQL\Resolvers;
 
-require_once realpath (__DIR__ . '/../Helpers.php');
+require_once realpath (__DIR__ . '/../Helpers/Helpers.php');
 
 trait MutationTypeResolver {
 
