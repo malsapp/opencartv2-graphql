@@ -206,7 +206,7 @@ function mobilySendMessage ($number, $msg) {
     $deleteKey = $msgId;
     $msg = convertToUnicode($msg);
 
-	$stringToPost = "mobile=".$userAccount."&password=".$passAccount."&numbers=".$number."&sender=".$sender."&msg=".$msg."&timeSend=".$timeSend."&dateSend=".$dateSend."&applicationType=".$applicationType."&domainName=".$domainName."&msgId=".$MsgID."&deleteKey=".$deleteKey;
+	$stringToPost = "mobile=".$userAccount."&password=".$passAccount."&numbers=".$number."&sender=".$sender."&msg=".$msg."&timeSend=".$timeSend."&dateSend=".$dateSend."&applicationType=".$applicationType."&domainName=".$domainName."&msgId=".$msgId."&deleteKey=".$deleteKey;
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
