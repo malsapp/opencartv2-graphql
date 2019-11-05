@@ -42,7 +42,7 @@ class MobileManager
     {
         $providerClassName = $mobileDriver;
         if ($mobileDriver === "" || !class_exists('GQL\\Mobile\\Providers\\' . $providerClassName)) {
-            $providerClassName = (new DBManager($this->ctx))->getSettingByKey('config_mobile', 'config_mobile_mobile_provider')['value'];
+            $providerClassName = (new DBManager($this->ctx))->getSettingByKey('mobile_config', 'mobile_config_mobile_provider')['value'];
         }
         $providerClass = 'GQL\\Mobile\\Providers\\' . $providerClassName;
         $provider  = new $providerClass($this->ctx);

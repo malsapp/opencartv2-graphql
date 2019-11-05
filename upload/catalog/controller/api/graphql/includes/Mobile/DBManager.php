@@ -79,7 +79,7 @@ class DBManager
     public function getMessageTemplate($message_topic)
     {
         $currentLanguageCode = $this->ctx->session->data['language'];
-        return $this->getSettingByKey('config_mobile', "config_mobile_{$message_topic}");
+        return $this->getSettingByKey('mobile_config', "mobile_config_{$message_topic}");
     }
 
     /**

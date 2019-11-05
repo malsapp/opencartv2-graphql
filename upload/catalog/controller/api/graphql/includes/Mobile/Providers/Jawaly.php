@@ -17,9 +17,9 @@ class Jawaly extends MobileDriver implements MobileDriverInterface
     public function __construct(&$ctx)
     {
         parent::__construct($ctx);
-        $this->USER = (new DBManager($ctx))->getSettingByKey('config_mobile','config_mobile_jawaly_username')['value'];
-        $this->PASSWORD = (new DBManager($ctx))->getSettingByKey('config_mobile','config_mobile_jawaly_password')['value'];
-        $this->SENDERNAME = (new DBManager($ctx))->getSettingByKey('config_mobile','config_mobile_jawaly_sendername')['value'];
+        $this->USER = (new DBManager($ctx))->getSettingByKey('mobile_config','mobile_config_mobile_username')['value'];
+        $this->PASSWORD = (new DBManager($ctx))->getSettingByKey('mobile_config','mobile_config_mobile_password')['value'];
+        $this->SENDERNAME = (new DBManager($ctx))->getSettingByKey('mobile_config','mobile_config_mobile_sendername')['value'];
     }
 
     /**
