@@ -1,8 +1,7 @@
 <?php
 namespace GQL\Resolvers;
 
-require_once realpath (__DIR__ . '/../Helpers/Helpers.php');
-
+use GQL\Helpers;
 trait RootQueryTypeResolver {
 
     public function RootQueryType_product ($root, $args, &$ctx) {
@@ -660,7 +659,7 @@ trait RootQueryTypeResolver {
                 }
 
                 // get current orders count
-                $datevaluechange=getFormattedDate($dateFormat, $day['date']);
+                $datevaluechange= Helpers\getFormattedDate($dateFormat, $day['date']);
 
                 // gets orders in a day
                 $ctx->load->model ('checkout/maxorderslot');

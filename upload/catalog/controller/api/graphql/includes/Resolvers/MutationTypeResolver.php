@@ -1,8 +1,8 @@
 <?php
 namespace GQL\Resolvers;
 
-require_once realpath (__DIR__ . '/../Helpers/Helpers.php');
 use GQL\Mobile\MobileManager;
+use GQL\Helpers;
 
 trait MutationTypeResolver {
     public function MutationType_addReview ($root, $args, &$ctx) {
@@ -14,14 +14,14 @@ trait MutationTypeResolver {
     public function MutationType_addAddress ($root, $args, &$ctx) {
         if (!$ctx->customer->isLogged ()) return false;
         $ctx->load->model ('account/address');
-        validateAddress ($ctx, $args['input']);
+        Helpers\validateAddress ($ctx, $args['input']);
         return $ctx->model_account_address->addAddress ($args['input']);
     }
 
     public function MutationType_editAddress ($root, $args, &$ctx) {
         if (!$ctx->customer->isLogged ()) return false;
         $ctx->load->model ('account/address');
-        validateAddress ($ctx, $args['input']);
+        Helpers\validateAddress ($ctx, $args['input']);
         $ctx->model_account_address->editAddress ($args['address_id'], $args['input']);
         return $ctx->db->countAffected () > 0;
     }
@@ -74,7 +74,7 @@ trait MutationTypeResolver {
         $data['accept_language'] = '';
 
         //get totals from server.
-        $totals = getTotals($ctx);
+        $totals = Helpers\getTotals($ctx);
         $data['totals'] = $totals['totals'];
         $data['total'] = $totals['total'];
 
@@ -149,7 +149,7 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_addItemToCart ($root, $args, &$ctx) {
-        addItemToCart ($ctx, $args);
+        Helpers\addItemToCart ($ctx, $args);
         return getCartType ($ctx);
     }
 
@@ -179,25 +179,25 @@ trait MutationTypeResolver {
         if ($ctx->model_extension_total_coupon->getCoupon($args['code'])) {
             $ctx->session->data['coupon'] = $args['code'];
         }
-        return getCartType ($ctx);
+        return Helpers\getCartType ($ctx);
     }
 
     public function MutationType_setPaymentAddress ($root, $args, &$ctx) {
-        return setAddress ($ctx, $args, 'payment_address');
+        return Helpers\setAddress ($ctx, $args, 'payment_address');
     }
 
     public function MutationType_setPaymentAddressById ($root, $args, &$ctx) {
-        return setAddress ($ctx, $args, 'payment_address');
+        return Helpers\setAddress ($ctx, $args, 'payment_address');
     }
 
     public function MutationType_setPaymentMethod ($root, $args, &$ctx) { return null; }
 
     public function MutationType_setShippingAddress ($root, $args, &$ctx) {
-        return setAddress ($ctx, $args, 'shipping_address');
+        return Helpers\setAddress ($ctx, $args, 'shipping_address');
     }
 
     public function MutationType_setShippingAddressById ($root, $args, &$ctx) {
-        return setAddress ($ctx, $args, 'shipping_address');
+        return Helpers\setAddress ($ctx, $args, 'shipping_address');
     }
 
     public function MutationType_setShippingMethod ($root, $args, &$ctx) {
@@ -278,7 +278,7 @@ trait MutationTypeResolver {
 
     public function MutationType_register ($root, $args, &$ctx) {
         $ctx->load->model('account/customer');
-        validateSignup ($args['input'], $ctx);
+        Helpers\validateSignup ($args['input'], $ctx);
 
         $customer_id = $ctx->model_account_customer->addCustomer($args['input']);
         $ctx->model_account_customer->deleteLoginAttempts($args['input']['email']);
@@ -288,7 +288,7 @@ trait MutationTypeResolver {
 
     public function MutationType_login ($root, $args, &$ctx) {
         $ctx->load->model('account/customer');
-        validateLogin ($args, $ctx);
+        Helpers\validateLogin ($args, $ctx);
 
         unset($ctx->session->data['guest']);
 
@@ -361,7 +361,7 @@ trait MutationTypeResolver {
 			throw new \Exception ($ctx->language->get('error_approved'));
 		}
 
-        forgottenMail ($ctx, $args);
+        Helpers\forgottenMail ($ctx, $args);
 
 		return true;
     }
@@ -496,11 +496,11 @@ trait MutationTypeResolver {
           'country_code' => $args['country_code'],
           'phone_number' => $args['phone_number'],
       ];
-      $isValid = (new MobileManager($ctx))->verifyOTP($to, $args['token']);
+      $isValid = (new MobileManager($ctx))->verifyOTP($to,$args['token']);
   
       if($isValid){
         // We need to handle if user number is invalid and has no associated User account
-        $loginToken = User::instance ()->loginByMobileNumberOTP ($args['country_code'].$args['phone_number']);
+        $loginToken = Helpers\loginByMobileNumberOTP ($args['country_code'].$args['phone_number']);
         if($loginToken)
         {
           $response['data'][] = [

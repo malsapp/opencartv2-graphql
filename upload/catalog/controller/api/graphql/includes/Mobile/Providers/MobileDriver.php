@@ -3,7 +3,6 @@
 namespace GQL\Mobile\Providers;
 
 use GQL\Mobile\DBManager;
-use GQL\Helpers;
 
 abstract class MobileDriver
 {
