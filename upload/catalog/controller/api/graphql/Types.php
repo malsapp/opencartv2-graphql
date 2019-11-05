@@ -4164,15 +4164,14 @@ class Types {
                         return self::$resolvers->MutationType_sendForgetPassword ($root, $args, $ctx);
                     }
                 ],
-                'loginByMobileNumberOTP' => [
-                    'type' => self::$ResponseType,
+                'loginByMobileNumber' => [
+                    'type' => Type::id (),
                     'args' => [
-                        'country_code' => Type::nonNull (Type::string ()),
-                        'phone_number' => Type::nonNull (Type::string ()),
-                        'token' => Type::nonNull (Type::string ())
+                        'mobile' => Type::nonNull (Type::string ()),
+                        'password' => Type::nonNull (Type::string ())
                     ],
                     'resolve' => function ($root, $args, $ctx) {
-                        return self::$resolvers->MutationType_loginByMobileNumberOTP ($root, $args, $ctx);
+                        return self::$resolvers->MutationType_loginByMobileNumber ($root, $args, $ctx);
                     }
                 ]
             ]; }

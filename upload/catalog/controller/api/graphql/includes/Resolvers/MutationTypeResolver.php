@@ -311,8 +311,8 @@ trait MutationTypeResolver {
             }
         }
 
-	// Re-apply coupon
-	if (isset ($ctx->session->data['coupon'])) {
+        // Re-apply coupon
+        if (isset ($ctx->session->data['coupon'])) {
             $ctx->load->model ('extension/total/coupon');
             if (!$ctx->model_extension_total_coupon->getCoupon ($ctx->session->data['coupon'])) {
                 unset ($ctx->session->data['coupon']);
@@ -487,37 +487,8 @@ trait MutationTypeResolver {
         return (new MobileManager($ctx))->verifyOTP($to, $token);
     }
     
-    public function MutationType_loginByMobileNumberOTP ($root, $args, $ctx) {
-      $response = [
-        'data' => [],
-        'errors' => []
-      ];
-      $to = [
-          'country_code' => $args['country_code'],
-          'phone_number' => $args['phone_number'],
-      ];
-      $isValid = (new MobileManager($ctx))->verifyOTP($to,$args['token']);
-  
-      if($isValid){
-        // We need to handle if user number is invalid and has no associated User account
-        $loginToken = Helpers\loginByMobileNumberOTP ($args['country_code'].$args['phone_number']);
-        if($loginToken)
-        {
-          $response['data'][] = [
-            'code' => 'SUCCESS',
-            'title' => 'LOGINTOKEN',
-            'content' => $loginToken,
-        ];
-        }
-      }else{
-          $response['errors'][] = [
-            'code' => 'INVALIDTOKEN',
-            'title' => 'Invalid Token',
-            'content' => 'The token is invalid!',
-        ];
-      }
-    
-      return $response;
+    public function MutationType_loginByMobileNumber ($root, $args, $ctx) {
+        return Helpers\loginByMobileNumber ($ctx, $args['mobile'], $args['password']);
     }
 }
 ?>

@@ -1,6 +1,8 @@
 <?php 
 namespace GQL\Helpers;
 
+use GQL\Mobile\DBManager;
+
 function validateLogin ($args, &$ctx) {
     $errors = array();
 
@@ -224,4 +226,16 @@ function forgottenMail (&$ctx, $args) {
             $ctx->model_account_activity->addActivity('forgotten', $activity_data);
         }
     }
+}
+
+function loginByMobileNumber(&$ctx, $phone_number, $password) {
+    $user = (new DBManager($ctx))->getUserByMobile($phone_number);
+
+    if (!$user) throw new \Exception ('Warning: PhoneNumber/Password is incorrect!');
+
+    $ctx->load->model('account/customer');
+    $ctx->model_account_customer->deleteLoginAttempts($user['email']);
+    $isValidCredentials = $ctx->customer->login($user['email'], $password);
+    if(!$isValidCredentials) throw new \Exception ('Warning: PhoneNumber/Password is incorrect!');
+    return $ctx->sess;
 }

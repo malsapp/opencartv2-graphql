@@ -123,6 +123,6 @@ class DBManager
             return false;
         }
 
-        return reset($query->row);
+        return $query->row;
     }
 }

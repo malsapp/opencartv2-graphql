@@ -601,8 +601,3 @@ function convertToUnicode($message)
     }
     return $strResult;
 }
-
-function getSettingByKey(&$ctx, $code, $key){
-    $query = $ctx->db->query("SELECT * FROM " . DB_PREFIX . "setting WHERE `code` = '" . $ctx->db->escape($code) . "' AND `key` = '".$ctx->db->escape($key)."'");
-    return $query->row;
-}
