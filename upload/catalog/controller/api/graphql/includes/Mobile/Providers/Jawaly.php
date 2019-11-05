@@ -3,6 +3,7 @@
 namespace GQL\Mobile\Providers;
 
 use GQL\Mobile\Contracts\MobileDriverInterface;
+use GQL\Mobile\DBManager;
 
 class Jawaly extends MobileDriver implements MobileDriverInterface
 {
@@ -13,11 +14,12 @@ class Jawaly extends MobileDriver implements MobileDriverInterface
     /**
      * Populate the credentials required to consume the api
      */
-    public function __construct($data)
+    public function __construct(&$ctx)
     {
-        $this->USER = $data['jawaly_username'];
-        $this->PASSWORD = $data['jawaly_password'];
-        $this->SENDERNAME = $data['jawaly_sendername'];
+        parent::__construct($ctx);
+        $this->USER = (new DBManager($ctx))->getSettingByKey('config_mobile','config_mobile_jawaly_username')['value'];
+        $this->PASSWORD = (new DBManager($ctx))->getSettingByKey('config_mobile','config_mobile_jawaly_password')['value'];
+        $this->SENDERNAME = (new DBManager($ctx))->getSettingByKey('config_mobile','config_mobile_jawaly_sendername')['value'];
     }
 
     /**

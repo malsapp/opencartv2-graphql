@@ -2,9 +2,9 @@
 namespace GQL\Resolvers;
 
 require_once realpath (__DIR__ . '/../Helpers/Helpers.php');
+use GQL\Mobile\MobileManager;
 
 trait MutationTypeResolver {
-
     public function MutationType_addReview ($root, $args, &$ctx) {
         $ctx->load->model ('catalog/review');
         $ctx->model_catalog_review->addReview ($args['product_id'], $args['input']);
@@ -460,8 +460,7 @@ trait MutationTypeResolver {
             'purpose' => $purpose,
             'via' => $via
         ];
-        
-        return (new MobileManager())->sendOTP($to, $options);
+        return (new MobileManager($ctx))->sendOTP($to, $options);
     }
 
     public function MutationType_sendForgetPassword($root, $args, $ctx)
@@ -474,7 +473,8 @@ trait MutationTypeResolver {
         $options = [
             'via'=>$via
         ];
-        return (new MobileManager())->sendForgetPassword($to, $options);
+
+        return (new MobileManager($ctx))->sendForgetPassword($to, $options);
     }
 
     public function MutationType_verifyOTP($root, $args, $ctx)
@@ -484,7 +484,7 @@ trait MutationTypeResolver {
             'phone_number' => $args['phone_number'],
         ];
         $token = $args['token'];
-        return (new MobileManager())->verifyOTP($to, $token);
+        return (new MobileManager($ctx))->verifyOTP($to, $token);
     }
     
     public function MutationType_loginByMobileNumberOTP ($root, $args, $ctx) {
@@ -496,7 +496,7 @@ trait MutationTypeResolver {
           'country_code' => $args['country_code'],
           'phone_number' => $args['phone_number'],
       ];
-      $isValid = (new MobileManager())->verifyOTP($to,$args['token']);
+      $isValid = (new MobileManager($ctx))->verifyOTP($to, $args['token']);
   
       if($isValid){
         // We need to handle if user number is invalid and has no associated User account

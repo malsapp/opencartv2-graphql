@@ -3,7 +3,7 @@
 namespace GQL\Mobile;
 use GQL\Helpers;
 
-class DBManager extends Singleton
+class DBManager
 {
     private $table_name;
     private $ctx;
@@ -55,7 +55,7 @@ class DBManager extends Singleton
             "SELECT `code` FROM $this->table_name WHERE telephone= {$telephone} AND is_valid = 1 AND UNIX_TIMESTAMP(createdAt)> ( UNIX_TIMESTAMP(NOW()) - 1000 ) LIMIT 1"
         );
 
-        return $result ? $result['code'] : false;
+        return $result->row ? $result->row['code'] : false;
     }
 
     /**
@@ -79,7 +79,7 @@ class DBManager extends Singleton
     public function getMessageTemplate($message_topic)
     {
         $currentLanguageCode = $this->ctx->session->data['language'];
-        return Helpers\getSettingByKey($this->ctx,'config_mobile',"config_mobile_{$message_topic}-{$currentLanguageCode}");
+        return $this->getSettingByKey('config_mobile', "config_mobile_{$message_topic}");
     }
 
     /**
@@ -97,5 +97,32 @@ class DBManager extends Singleton
         }
 
         return false;
+    }
+
+    /**
+     * Gets a settings record by its code and key
+     * @param string $code
+     * @param string $key
+     * @return array
+     */
+    public function getSettingByKey($code, $key){
+        $query = $this->ctx->db->query("SELECT * FROM " . DB_PREFIX . "setting WHERE `code` = '" . $this->ctx->db->escape($code) . "' AND `key` = '".$this->ctx->db->escape($key)."'");
+        return $query->row;
+    }
+
+    /**
+     * Check if a user with a specific phone_number is already registered 
+     * @param string $phone_number
+     * @return array
+     */
+    public function getUserByMobile($phone_number)
+    {
+        $query = $this->ctx->db->query("SELECT * FROM " . DB_PREFIX . "customer WHERE `telephone` = '" . $this->ctx->db->escape($phone_number) . "'");
+
+        if (count($query->rows) == 0) {
+            return false;
+        }
+
+        return reset($query->row);
     }
 }

@@ -2,11 +2,17 @@
 
 namespace GQL\Mobile\Providers;
 
-use GQL\Helpers\User;
 use GQL\Mobile\DBManager;
+use GQL\Helpers;
 
 abstract class MobileDriver
 {
+    private $ctx;
+
+    public function __construct(&$ctx)
+    {
+        $this->ctx = $ctx;
+    }
     /**
      * Send OTP in SMS
      * @param array $to
@@ -21,7 +27,7 @@ abstract class MobileDriver
         ];
         $telephone = $to['country_code'] . $to['phone_number'];
         if ($options['purpose'] == "register") {
-            $user = User::instance()->getUserByMobile($telephone);
+            $user = (new DBManager($this->ctx))->getUserByMobile($telephone);
             if (isset($user) && !empty($user)) {
                 $response['errors'][] = [
                     'code' => 'EXISTS',
@@ -32,8 +38,10 @@ abstract class MobileDriver
             }
         }
         $code = rand(1000, 9999);
-        $code = DBManager::instance()->saveCodeOrGetOldOne($telephone, $code);
-        $message_template = DBManager::instance()->getMessageTemplate('message_template_otp');
+        
+
+        $code = (new DBManager($this->ctx))->saveCodeOrGetOldOne($telephone, $code);
+        $message_template = (new DBManager($this->ctx))->getMessageTemplate('message_template_otp')['value'];
 
         $text = urlencode(str_replace("SHOPZOTPCODE", $code, $message_template));
         $response = array_merge($response, $this->sendSMS($to, $text));
@@ -52,7 +60,7 @@ abstract class MobileDriver
             'errors' => []
         ];
         $telephone = $to['country_code'] . $to['phone_number'];
-        $user = User::instance()->getUserByMobile($telephone);
+        $user = (new DBManager($this->ctx))->getUserByMobile($telephone);
         if (!$user) {
             $response['errors'][] = [
                 'code' => 'NOTEXISTS',
@@ -61,8 +69,9 @@ abstract class MobileDriver
             ];
             return $response;
         }
-        $forgotPassURL = wc_lostpassword_url();
-        $message_template = DBManager::instance()->getMessageTemplate('message_template_forgot');
+
+        $forgotPassURL = $this->ctx->url->link('account/forgotten', '', true);
+        $message_template = (new DBManager($this->ctx))->getMessageTemplate('message_template_forgot')['value'];
         $text = urlencode(strftime('%Y-%m-%d %H-%M-%S', time()) . ": " . str_replace("SHOPZFORGOT", $forgotPassURL, $message_template));
 
         $isSent = $this->sendSMS($to, $text);
@@ -85,6 +94,6 @@ abstract class MobileDriver
     public function verifyOTP($to, $token)
     {
         $telephone = $to['country_code'] . $to['phone_number'];
-        return DBManager::instance()->verifyToken($telephone, $token);
+        return (new DBManager($this->ctx))->verifyToken($telephone, $token);
     }
 }

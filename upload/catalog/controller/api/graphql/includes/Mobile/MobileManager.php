@@ -7,9 +7,10 @@ use GQL\Helpers;
 class MobileManager
 {
     private $mobileDriver;
-
-    public function __construct()
+    private $ctx;
+    public function __construct(&$ctx)
     {
+        $this->ctx = $ctx;
         $this->setMobileProvider();
     }
 
@@ -41,10 +42,10 @@ class MobileManager
     {
         $providerClassName = $mobileDriver;
         if ($mobileDriver === "" || !class_exists('GQL\\Mobile\\Providers\\' . $providerClassName)) {
-            $providerClassName = Helpers\getSettingByKey($ctx, 'config_mobile', 'mobile_provider')['value'];
+            $providerClassName = (new DBManager($this->ctx))->getSettingByKey('config_mobile', 'config_mobile_mobile_provider')['value'];
         }
         $providerClass = 'GQL\\Mobile\\Providers\\' . $providerClassName;
-        $provider  = new $providerClass;
+        $provider  = new $providerClass($this->ctx);
         if(!($provider instanceof MobileDriverInterface)){
             throw new \Exception("Provider Not Valid");
         }
