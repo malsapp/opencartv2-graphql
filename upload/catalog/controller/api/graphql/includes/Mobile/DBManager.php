@@ -7,9 +7,9 @@ class DBManager
 {
     private $table_name;
     private $ctx;
-    public function __construct(&$ctx)
+    public function __construct()
     {
-        $this->ctx = $ctx;
+        $this->ctx = $GLOBALS['reg'];
         $this->table_name = DB_PREFIX . 'otp_tokens';
     }
 
@@ -37,7 +37,7 @@ class DBManager
      */
     private function insertCode($telephone, $code)
     {
-        $this->ctx->db->query(
+        $this->ctx->get('db')->query(
             "INSERT INTO $this->table_name (telephone, `code`, createdAt) values ({$telephone}, {$code}, NOW())"
         );
 
@@ -51,7 +51,7 @@ class DBManager
      */
     private function searchCode($telephone)
     {
-        $result = $this->ctx->db->query(
+        $result = $this->ctx->get('db')->query(
             "SELECT `code` FROM $this->table_name WHERE telephone= {$telephone} AND is_valid = 1 AND UNIX_TIMESTAMP(createdAt)> ( UNIX_TIMESTAMP(NOW()) - 1000 ) LIMIT 1"
         );
 
@@ -65,7 +65,7 @@ class DBManager
      */
     private function setNotValid($telephone, $token)
     {
-        $this->ctx->db->query(
+        $this->ctx->get('db')->query(
             "UPDATE $this->table_name SET is_valid = 0 WHERE telephone= {$telephone} AND `code` = {$token}"
         );
     }
@@ -78,7 +78,7 @@ class DBManager
      */
     public function getMessageTemplate($message_topic)
     {
-        $currentLanguageCode = $this->ctx->session->data['language'];
+        $currentLanguageCode = $this->ctx->get('session')->data['language'];
         return $this->getSettingByKey('mobile_config', "mobile_config_{$message_topic}");
     }
 
@@ -106,7 +106,7 @@ class DBManager
      * @return array
      */
     public function getSettingByKey($code, $key){
-        $query = $this->ctx->db->query("SELECT * FROM " . DB_PREFIX . "setting WHERE `code` = '" . $this->ctx->db->escape($code) . "' AND `key` = '".$this->ctx->db->escape($key)."'");
+        $query = $this->ctx->get('db')->query("SELECT * FROM " . DB_PREFIX . "setting WHERE `code` = '" . $this->ctx->get('db')->escape($code) . "' AND `key` = '".$this->ctx->get('db')->escape($key)."'");
         return $query->row;
     }
 
@@ -117,7 +117,7 @@ class DBManager
      */
     public function getUserByMobile($phone_number)
     {
-        $query = $this->ctx->db->query("SELECT * FROM " . DB_PREFIX . "customer WHERE `telephone` = '" . $this->ctx->db->escape($phone_number) . "'");
+        $query = $this->ctx->get('db')->query("SELECT * FROM " . DB_PREFIX . "customer WHERE `telephone` = '" . $this->ctx->get('db')->escape($phone_number) . "'");
 
         if (count($query->rows) == 0) {
             return false;

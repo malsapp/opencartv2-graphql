@@ -150,12 +150,12 @@ trait MutationTypeResolver {
 
     public function MutationType_addItemToCart ($root, $args, &$ctx) {
         Helpers\addItemToCart ($ctx, $args);
-        return getCartType ($ctx);
+        return Helpers\getCartType ($ctx);
     }
 
     public function MutationType_addItemsToCart ($root, $args, &$ctx) {
         foreach ($args['input'] as $item) addItemToCart ($ctx, $args);
-        return getCartType ($ctx);
+        return Helpers\getCartType ($ctx);
     }
 
     public function MutationType_updateCartItem ($root, $args, &$ctx) {
@@ -259,7 +259,7 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_editCustomer ($root, $args, &$ctx) {
-        validateCustomerEdit ($ctx, $args['input']);
+        Helpers\validateCustomerEdit ($ctx, $args['input']);
         if (!$ctx->customer->isLogged ()) throw new \Exception ();
 
         $ctx->model_account_customer->editCustomer($args['input']);
@@ -267,7 +267,7 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_editPassword ($root, $args, &$ctx) {
-        validatePassword ($ctx, $args);
+        Helpers\validatePassword ($ctx, $args);
         if (!$ctx->customer->isLogged()) return false;
 
         $ctx->load->model('account/customer');
@@ -426,14 +426,14 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_sendVerificationCode ($root, $args, &$ctx) {
-        return sendVerificationCode (
+        return Helpers\sendVerificationCode (
             $args['countryCode'],
             $args['mobileNumber']
         );
     }
 
     public function MutationType_verifyMobileCode ($root, $args, &$ctx) {
-        return verifyCode (
+        return Helpers\verifyCode (
             $args['countryCode'],
             $args['mobileNumber'],
             $args['verificationCode']
@@ -450,7 +450,7 @@ trait MutationTypeResolver {
     public function MutationType_sendOTP($root, $args, $ctx)
     {
         $via = $args['via'] ?? 'sms';
-        $purpose = $args['purpose'] ?? $args['purpose'];
+        $purpose = $args['purpose'] ?? '';
 
         $to = [
             'country_code' => $args['country_code'],
@@ -460,7 +460,7 @@ trait MutationTypeResolver {
             'purpose' => $purpose,
             'via' => $via
         ];
-        return (new MobileManager($ctx))->sendOTP($to, $options);
+        return (new MobileManager)->sendOTP($to, $options);
     }
 
     public function MutationType_sendForgetPassword($root, $args, $ctx)
@@ -474,7 +474,7 @@ trait MutationTypeResolver {
             'via'=>$via
         ];
 
-        return (new MobileManager($ctx))->sendForgetPassword($to, $options);
+        return (new MobileManager)->sendForgetPassword($to, $options);
     }
 
     public function MutationType_verifyOTP($root, $args, $ctx)
@@ -484,7 +484,7 @@ trait MutationTypeResolver {
             'phone_number' => $args['phone_number'],
         ];
         $token = $args['token'];
-        return (new MobileManager($ctx))->verifyOTP($to, $token);
+        return (new MobileManager)->verifyOTP($to, $token);
     }
     
     public function MutationType_loginByMobileNumber ($root, $args, $ctx) {

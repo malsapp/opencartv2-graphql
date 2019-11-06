@@ -2,15 +2,12 @@
 namespace GQL\Mobile;
 
 use GQL\Mobile\Contracts\MobileDriverInterface;
-use GQL\Helpers;
 
 class MobileManager
 {
     private $mobileDriver;
-    private $ctx;
-    public function __construct(&$ctx)
+    public function __construct()
     {
-        $this->ctx = $ctx;
         $this->setMobileProvider();
     }
 
@@ -42,10 +39,10 @@ class MobileManager
     {
         $providerClassName = $mobileDriver;
         if ($mobileDriver === "" || !class_exists('GQL\\Mobile\\Providers\\' . $providerClassName)) {
-            $providerClassName = (new DBManager($this->ctx))->getSettingByKey('mobile_config', 'mobile_config_mobile_provider')['value'];
+            $providerClassName = (new DBManager)->getSettingByKey('mobile_config', 'mobile_config_mobile_provider')['value'];
         }
         $providerClass = 'GQL\\Mobile\\Providers\\' . $providerClassName;
-        $provider  = new $providerClass($this->ctx);
+        $provider  = new $providerClass;
         if(!($provider instanceof MobileDriverInterface)){
             throw new \Exception("Provider Not Valid");
         }
