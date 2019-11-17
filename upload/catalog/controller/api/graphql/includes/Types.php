@@ -1,14 +1,11 @@
 <?php
 namespace GQL;
 
-require_once __DIR__.'/includes/Resolvers.php';
-
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Schema;
-use \Exception;
+use GQL\Resolvers;
 
 class Types {
     private static $types;

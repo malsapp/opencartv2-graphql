@@ -2,7 +2,10 @@
 namespace GQL\Resolvers;
 
 use GQL\Mobile\MobileManager;
-use GQL\Helpers;
+use GQL\Helpers\Address;
+use GQL\Helpers\Cart;
+use GQL\Helpers\User;
+use GQL\Helpers\Utils;
 
 trait MutationTypeResolver {
     public function MutationType_addReview ($root, $args, &$ctx) {
@@ -14,14 +17,14 @@ trait MutationTypeResolver {
     public function MutationType_addAddress ($root, $args, &$ctx) {
         if (!$ctx->customer->isLogged ()) return false;
         $ctx->load->model ('account/address');
-        Helpers\validateAddress ($ctx, $args['input']);
+        Address::validateAddress ($ctx, $args['input']);
         return $ctx->model_account_address->addAddress ($args['input']);
     }
 
     public function MutationType_editAddress ($root, $args, &$ctx) {
         if (!$ctx->customer->isLogged ()) return false;
         $ctx->load->model ('account/address');
-        Helpers\validateAddress ($ctx, $args['input']);
+        Address::validateAddress ($ctx, $args['input']);
         $ctx->model_account_address->editAddress ($args['address_id'], $args['input']);
         return $ctx->db->countAffected () > 0;
     }
@@ -74,7 +77,7 @@ trait MutationTypeResolver {
         $data['accept_language'] = '';
 
         //get totals from server.
-        $totals = Helpers\getTotals($ctx);
+        $totals = Cart::getTotals($ctx);
         $data['totals'] = $totals['totals'];
         $data['total'] = $totals['total'];
 
@@ -149,13 +152,13 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_addItemToCart ($root, $args, &$ctx) {
-        Helpers\addItemToCart ($ctx, $args);
-        return Helpers\getCartType ($ctx);
+        Cart::addItemToCart ($ctx, $args);
+        return Cart::getCartType ($ctx);
     }
 
     public function MutationType_addItemsToCart ($root, $args, &$ctx) {
         foreach ($args['input'] as $item) addItemToCart ($ctx, $args);
-        return Helpers\getCartType ($ctx);
+        return Cart::getCartType ($ctx);
     }
 
     public function MutationType_updateCartItem ($root, $args, &$ctx) {
@@ -179,25 +182,25 @@ trait MutationTypeResolver {
         if ($ctx->model_extension_total_coupon->getCoupon($args['code'])) {
             $ctx->session->data['coupon'] = $args['code'];
         }
-        return Helpers\getCartType ($ctx);
+        return Cart::getCartType ($ctx);
     }
 
     public function MutationType_setPaymentAddress ($root, $args, &$ctx) {
-        return Helpers\setAddress ($ctx, $args, 'payment_address');
+        return Address::setAddress ($ctx, $args, 'payment_address');
     }
 
     public function MutationType_setPaymentAddressById ($root, $args, &$ctx) {
-        return Helpers\setAddress ($ctx, $args, 'payment_address');
+        return Address::setAddress ($ctx, $args, 'payment_address');
     }
 
     public function MutationType_setPaymentMethod ($root, $args, &$ctx) { return null; }
 
     public function MutationType_setShippingAddress ($root, $args, &$ctx) {
-        return Helpers\setAddress ($ctx, $args, 'shipping_address');
+        return Address::setAddress ($ctx, $args, 'shipping_address');
     }
 
     public function MutationType_setShippingAddressById ($root, $args, &$ctx) {
-        return Helpers\setAddress ($ctx, $args, 'shipping_address');
+        return Address::setAddress ($ctx, $args, 'shipping_address');
     }
 
     public function MutationType_setShippingMethod ($root, $args, &$ctx) {
@@ -259,7 +262,7 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_editCustomer ($root, $args, &$ctx) {
-        Helpers\validateCustomerEdit ($ctx, $args['input']);
+        User::validateCustomerEdit ($ctx, $args['input']);
         if (!$ctx->customer->isLogged ()) throw new \Exception ();
 
         $ctx->model_account_customer->editCustomer($args['input']);
@@ -267,7 +270,7 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_editPassword ($root, $args, &$ctx) {
-        Helpers\validatePassword ($ctx, $args);
+        User::validatePassword ($ctx, $args);
         if (!$ctx->customer->isLogged()) return false;
 
         $ctx->load->model('account/customer');
@@ -278,7 +281,7 @@ trait MutationTypeResolver {
 
     public function MutationType_register ($root, $args, &$ctx) {
         $ctx->load->model('account/customer');
-        Helpers\validateSignup ($args['input'], $ctx);
+        User::validateSignup ($args['input'], $ctx);
 
         $customer_id = $ctx->model_account_customer->addCustomer($args['input']);
         $ctx->model_account_customer->deleteLoginAttempts($args['input']['email']);
@@ -288,7 +291,7 @@ trait MutationTypeResolver {
 
     public function MutationType_login ($root, $args, &$ctx) {
         $ctx->load->model('account/customer');
-        Helpers\validateLogin ($args, $ctx);
+        User::validateLogin ($args, $ctx);
 
         unset($ctx->session->data['guest']);
 
@@ -349,8 +352,6 @@ trait MutationTypeResolver {
         $ctx->load->model('account/customer');
         $ctx->load->language('account/forgotten');
 
-        error_log(print_r($args, true));
-
         if (!$ctx->model_account_customer->getTotalCustomersByEmail($args['email'])) {
 			throw new \Exception ($ctx->language->get('error_email'));
 		}
@@ -361,7 +362,7 @@ trait MutationTypeResolver {
 			throw new \Exception ($ctx->language->get('error_approved'));
 		}
 
-        Helpers\forgottenMail ($ctx, $args);
+        User::forgottenMail ($ctx, $args);
 
 		return true;
     }
@@ -426,14 +427,14 @@ trait MutationTypeResolver {
     }
 
     public function MutationType_sendVerificationCode ($root, $args, &$ctx) {
-        return Helpers\sendVerificationCode (
+        return Utils::sendVerificationCode (
             $args['countryCode'],
             $args['mobileNumber']
         );
     }
 
     public function MutationType_verifyMobileCode ($root, $args, &$ctx) {
-        return Helpers\verifyCode (
+        return Utils::verifyCode (
             $args['countryCode'],
             $args['mobileNumber'],
             $args['verificationCode']
@@ -488,7 +489,7 @@ trait MutationTypeResolver {
     }
     
     public function MutationType_loginByMobileNumber ($root, $args, $ctx) {
-        return Helpers\loginByMobileNumber ($ctx, $args['mobile'], $args['password']);
+        return User::loginByMobileNumber ($ctx, $args['mobile'], $args['password']);
     }
 }
 ?>

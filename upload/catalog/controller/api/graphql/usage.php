@@ -1,9 +1,10 @@
 <?php
-use GraphQL\GraphQL;
 
 require_once __DIR__.'/vendor/autoload.php';
-require_once __DIR__.'/includes/Helpers/Helpers.php';
-require_once __DIR__.'/Types.php';
+
+use GraphQL\GraphQL;
+use GQL\Types;
+use GQL\Helpers\Utils;
 
 define ('GQ_INTERNAL_KEY', '__GQ_INTERNAL_KEY__');
 define ('GQ_PLUGIN_VERSION', '1.129');
@@ -12,7 +13,6 @@ class ControllerApiGraphqlUsage extends Controller {
 	public $sess = "";
 
 	function index () {
-		error_reporting (0);
 		$rawBody = "";
 		if (!isset($this->request->get['token']) && false){
 			$result = [
@@ -21,15 +21,16 @@ class ControllerApiGraphqlUsage extends Controller {
 				]
 			];
 		} else{
-			$token=$this->request->get['token'];
-			$this->load->model('account/api');
-			$api_info = $this->model_account_api->getApiByKey($token);
-			if(!$api_info && false){
-				$result = [
-					'error' => [
-					    'message' => 'Not Authorized'
-					]
-				];
+			// $token=$this->request->get['token'];
+			// $this->load->model('account/api');
+			// $api_info = $this->model_account_api->getApiByKey($token);
+			// if(!$api_info && false){
+			// 	$result = [
+			// 		'error' => [
+			// 		    'message' => 'Not Authorized'
+			// 		]
+			// 	];
+			if(false){
 			}else{
 				try {
 					// Set a session and send it back.
@@ -43,7 +44,7 @@ class ControllerApiGraphqlUsage extends Controller {
 					}
 
 					if (!empty ($this->sess)){
-						$this->sess = GQL\Helpers\getSession ($this, $this->sess);
+						$this->sess = Utils::getSession ($this, $this->sess);
 						header("x-session-id: {$this->sess}");
 					}
 
@@ -54,7 +55,7 @@ class ControllerApiGraphqlUsage extends Controller {
 					$variableValues = isset($data['variables']) ? $data['variables'] : null;
 					if (!(is_object ($variableValues) || is_array($variableValues)))
 						$variableValues = json_decode($variableValues, True);
-					$types = GQL\Types::Instance ();
+					$types = Types::Instance ();
 					$rootValue = ['prefix' => 'You said: '];
 					$result = GraphQL::execute($types::$schema, $requestString, null, $this, $variableValues);
 				} catch (\Exception $e) {

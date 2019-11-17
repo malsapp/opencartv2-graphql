@@ -1,7 +1,11 @@
 <?php
 namespace GQL\Resolvers;
 
-use GQL\Helpers;
+use GQL\Helpers\Address;
+use GQL\Helpers\Cart;
+use GQL\Helpers\User;
+use GQL\Helpers\Utils;
+
 trait RootQueryTypeResolver {
 
     public function RootQueryType_product ($root, $args, &$ctx) {
@@ -23,7 +27,7 @@ trait RootQueryTypeResolver {
         ];
 
         $ctx->load->model ('catalog/product');
-        $args['sort'] = in_array($key_mapper[$args['sort']], array_keys($key_mapper)) ? $key_mapper[$args['sort']] : '';
+        $args['sort'] = isset($args['sort'])?in_array($key_mapper[$args['sort']], array_keys($key_mapper)) ? $key_mapper[$args['sort']] : '': '';
         $products = $ctx->model_catalog_product->getProducts ($args);
         foreach($products as &$product){
             $product['description'] = strip_tags(html_entity_decode($product['description']));
@@ -271,12 +275,12 @@ trait RootQueryTypeResolver {
         $id = isset ($ctx->sess) ? $ctx->sess : null;
         $id = isset ($args['id']) ? $args['id'] : $id;
         return [
-            'id' => getSession ($ctx, $id)
+            'id' => Utils::getSession ($ctx, $id)
         ];
     }
 
     public function RootQueryType_cart ($root, $args, &$ctx) {
-        return getCartType ($ctx);
+        return Cart::getCartType ($ctx);
     }
 
     public function RootQueryType_address ($root, $args, &$ctx) {
@@ -448,15 +452,15 @@ trait RootQueryTypeResolver {
     public function RootQueryType_getCustomFields ($root, $args, &$ctx) { return null; }
 
     public function RootQueryType_paymentAddress ($root, $args, &$ctx) {
-        return getAddress ($ctx, 'payment_address');
+        return Address::getAddress ($ctx, 'payment_address');
     }
 
     public function RootQueryType_shippingAddress ($root, $args, &$ctx) {
-        return getAddress ($ctx, 'shipping_address');
+        return Address::getAddress ($ctx, 'shipping_address');
     }
 
     public function RootQueryType_paymentMethods ($root, $args, &$ctx) {
-        $res = getPaymentMethods ($ctx);
+        $res = Cart::getPaymentMethods ($ctx);
         foreach ($res as &$item) {
             $item['quote'] = $item['quote'];
         }
@@ -464,7 +468,7 @@ trait RootQueryTypeResolver {
     }
 
     public function RootQueryType_shippingMethods ($root, $args, &$ctx) {
-        $res = getShippingMethods ($ctx);
+        $res = Cart::getShippingMethods ($ctx);
         foreach ($res as &$item) {
             $item['quote'] = reset($item['quote']);
         }
@@ -577,15 +581,15 @@ trait RootQueryTypeResolver {
     }
 
     public function RootQueryType_orderStatuses ($root, $args, &$ctx) {
-        return getOrderStatuses ($ctx);
+        return Cart::getOrderStatuses ($ctx);
     }
 
     public function RootQueryType_productVariationPrice ($root, $args, &$ctx) {
-        return variationData ($args, $ctx);
+        return Utils::variationData ($args, $ctx);
     }
 
     public function RootQueryType_productVariationData ($root, $args, &$ctx) {
-        return variationData ($args, $ctx);
+        return Utils::variationData ($args, $ctx);
     }
 
     public function RootQueryType_siteInfo ($root, $args, &$ctx) {
@@ -594,7 +598,7 @@ trait RootQueryTypeResolver {
 
         return [
             'phpversion' => phpversion(),
-            'phpinfo' => pinfo(),
+            'phpinfo' => Utils::pinfo(),
             'mysqlversion' => $mysqlversion->rows[0]['version()'],
             'pluginversion' => GQ_PLUGIN_VERSION
         ];
@@ -659,7 +663,7 @@ trait RootQueryTypeResolver {
                 }
 
                 // get current orders count
-                $datevaluechange= Helpers\getFormattedDate($dateFormat, $day['date']);
+                $datevaluechange= Utils::getFormattedDate($dateFormat, $day['date']);
 
                 // gets orders in a day
                 $ctx->load->model ('checkout/maxorderslot');
