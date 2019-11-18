@@ -11,8 +11,8 @@ define ('GQ_PLUGIN_VERSION', '1.129');
 
 class ControllerApiGraphqlUsage extends Controller {
 	public $sess = "";
-
-	function index () {
+	public function index () {
+		error_reporting(0);
 		$rawBody = "";
 		if (!isset($this->request->get['token']) && false){
 			$result = [

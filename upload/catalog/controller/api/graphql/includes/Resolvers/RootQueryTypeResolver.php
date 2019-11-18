@@ -3,7 +3,6 @@ namespace GQL\Resolvers;
 
 use GQL\Helpers\Address;
 use GQL\Helpers\Cart;
-use GQL\Helpers\User;
 use GQL\Helpers\Utils;
 
 trait RootQueryTypeResolver {

@@ -18,7 +18,7 @@ class Utils
         ini_set('session.gc_maxlifetime', 999999999);
 
         global $reg;
-        $reg = getRegistry($ctx);
+        $reg = self::getRegistry($ctx);
 
         $session = new Sess('db');
         $ctx->session = $session;
