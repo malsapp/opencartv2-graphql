@@ -76,11 +76,12 @@ class Cart
 
     public static function calculate_taxes($taxes_array)
     {
-        $total = array_reduce($taxes_array, function ($count, $tax) {
+        $sum =0;
+        $sum = array_reduce($taxes_array, function ($total, $tax) {
             return $total + $tax;
         });
 
-        return isset($total) ? $total : 0;
+        return $sum;
     }
 
     public static function addItemToCart(&$ctx, &$args)
@@ -169,7 +170,7 @@ class Cart
         $ctx->load->language('checkout/checkout');
 
         if (isset($ctx->session->data['shipping_address'])) {
-            $ctx->session->data['shipping_methods'] = getMethods($ctx, 'shipping');
+            $ctx->session->data['shipping_methods'] = self::getMethods($ctx, 'shipping');
         }
 
         return $ctx->session->data['shipping_methods'];
@@ -180,7 +181,7 @@ class Cart
         $ctx->load->language('checkout/checkout');
 
         if (isset($ctx->session->data['shipping_address'])) {
-            $ctx->session->data['shipping_methods'] = getMethods($ctx, 'payment');
+            $ctx->session->data['shipping_methods'] = self::getMethods($ctx, 'payment');
         }
 
         return $ctx->session->data['shipping_methods'];
