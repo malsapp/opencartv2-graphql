@@ -2,6 +2,9 @@
 namespace GQL\Resolvers;
 
 trait CategoryTypeResolver {
+    public function CategoryType_description($root, $args, &$ctx){
+        return strip_tags(html_entity_decode($root['description']));
+    }
     
     public function CategoryType_language ($root, $args, &$ctx) {
         $ctx->load->model ('localisation/language');

@@ -118,7 +118,10 @@ class Types {
                     'type' => Type::string ()
                 ],
                 'description' => [
-                    'type' => Type::string ()
+                    'type' => Type::string (),
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->ProductType_description ($root, $args, $ctx);
+                    }
                 ],
                 'meta_title' => [
                     'type' => Type::string ()
@@ -563,7 +566,10 @@ class Types {
                     'type' => Type::int ()
                 ],
                 'description' => [
-                    'type' => Type::string ()
+                    'type' => Type::string (),
+                    'resolve' => function ($root, $args, $ctx) {
+                        return self::$resolvers->CategoryType_description ($root, $args, $ctx);
+                    }
                 ],
                 'date_added' => [
                     'type' => Type::string ()

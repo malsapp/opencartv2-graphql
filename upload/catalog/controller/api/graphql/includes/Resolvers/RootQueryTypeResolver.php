@@ -10,7 +10,6 @@ trait RootQueryTypeResolver {
     public function RootQueryType_product ($root, $args, &$ctx) {
         $ctx->load->model ('catalog/product');
         $product = $ctx->model_catalog_product->getProduct ($args['id']);
-        $product['description'] = strip_tags(html_entity_decode($product['description']));
         return $product;
     }
 
@@ -28,9 +27,6 @@ trait RootQueryTypeResolver {
         $ctx->load->model ('catalog/product');
         $args['sort'] = isset($args['sort'])?in_array($key_mapper[$args['sort']], array_keys($key_mapper)) ? $key_mapper[$args['sort']] : '': '';
         $products = $ctx->model_catalog_product->getProducts ($args);
-        foreach($products as &$product){
-            $product['description'] = strip_tags(html_entity_decode($product['description']));
-        }
         return $products;
     }
 

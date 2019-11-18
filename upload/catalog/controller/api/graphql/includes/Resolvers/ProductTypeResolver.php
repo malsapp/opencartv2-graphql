@@ -3,6 +3,10 @@ namespace GQL\Resolvers;
 
 trait ProductTypeResolver {
     
+    public function ProductType_description($root, $args, &$ctx){
+        return strip_tags(html_entity_decode($root['description']));
+    }
+
     public function ProductType_manufacturer ($root, $args, &$ctx) {
         $ctx->load->model ('catalog/manufacturer');
         $manufacturer = $ctx->model_catalog_manufacturer->getManufacturer ($root['manufacturer_id']);
