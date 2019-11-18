@@ -34,7 +34,7 @@ class Cart
 
     public static function getCartType(&$ctx)
     {
-        $total_data = getTotals($ctx);
+        $total_data = self::getTotals($ctx);
         $totals = $total_data['totals'];
         $res = array();
         foreach ($totals as $total) {
@@ -44,7 +44,7 @@ class Cart
         if (!$res['tax']) $res['tax'] = 0;
 
         $coupon = isset($ctx->session->data['coupon']) ? $ctx->session->data['coupon'] : '';
-        $taxes = calculate_taxes($ctx->cart->getTaxes());
+        $taxes = self::calculate_taxes($ctx->cart->getTaxes());
 
         $productsArray = [];
         $ctx->load->model('catalog/product');
@@ -199,7 +199,7 @@ class Cart
                 if ($methodType == 'shipping') {
                     $quote = $ctx->{"model_extension_{$methodType}_" . $result['code']}->getQuote($ctx->session->data['shipping_address']);
                 } elseif ($methodType == 'payment') {
-                    $totals = getTotals($ctx);
+                    $totals = self::getTotals($ctx);
                     $quote = $ctx->{"model_extension_{$methodType}_" . $result['code']}->getMethod($ctx->session->data['shipping_address'], $totals['total']);
                 }
 
